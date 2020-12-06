@@ -7,6 +7,8 @@ import (
 	"net"
 
 	"request"
+	"response"
+	"status"
 )
 
 type Server struct {
@@ -59,22 +61,14 @@ func (s *Server) Run() error {
 	}
 }
 
-func badRequest(c net.Conn, msg string) {
-	fmt.Fprint(c, "HTTP/1.1 400 Bad Request\r\n")
-	if msg == "" {
-		return
-	}
-	fmt.Fprintf(c, "Content-Type: text/plain\r\n\r\n%s", msg)
-}
-
 func (s *Server) handleConnection(c net.Conn) {
 	defer c.Close()
 
 	req, err := request.Parse(c)
 	if err != nil {
-		badRequest(c, err.Error())
+		response.WrapErr(status.BadRequest, err).WriteResponse(c, "HTTP/1.1")
 		return
 	}
 
-	req.Dump(c)
+	response.DumpRequest(req).WriteResponse(c, req.HTTPVersion())
 }

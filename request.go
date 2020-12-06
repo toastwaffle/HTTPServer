@@ -11,8 +11,11 @@ import (
 )
 
 type Request interface {
-	// Placeholder method to dump the request as a HTTP 200 response.
-	Dump(net.Conn)
+	Method() string
+	URI() string
+	HTTPVersion() string
+	Headers() map[string]string
+	Body() string
 }
 
 type request struct {
@@ -80,20 +83,22 @@ func Parse(c net.Conn) (Request, error) {
 	return req, nil
 }
 
-func (r *request) Dump(c net.Conn) {
-	fmt.Fprintf(c, "%s 200 OK\r\n", r.httpVersion)
-	fmt.Fprint(c, "Content-Type: text/plain\r\n")
-	fmt.Fprint(c, "\r\n")
-	fmt.Fprintf(c, "Method: %s\r\n", r.method)
-	fmt.Fprintf(c, "URI: %s\r\n", r.uri)
-	fmt.Fprintf(c, "HTTP Version: %s\r\n", r.httpVersion)
-	if len(r.headers) > 0 {
-		fmt.Fprint(c, "Headers:\r\n")
-		for k, v := range r.headers {
-			fmt.Fprintf(c, "  %s: %s\r\n", k, v)
-		}
-	}
-	if r.body != "" {
-		fmt.Fprintf(c, "Body:\r\n\r\n%s", r.body)
-	}
+func (r *request) Method() string {
+	return r.method
+}
+
+func (r *request) URI() string {
+	return r.uri
+}
+
+func (r *request) HTTPVersion() string {
+	return r.httpVersion
+}
+
+func (r *request) Headers() map[string]string {
+	return r.headers
+}
+
+func (r *request) Body() string {
+	return r.body
 }
