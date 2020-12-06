@@ -8,6 +8,13 @@ go_binary(
 
 go_library(
     name = "server",
-    srcs = ["server.go"],
     importpath = "server",
+    srcs = ["server.go"],
+    deps = [":request"],
+)
+
+go_library(
+    name = "request",
+    importpath = "request",
+    srcs = ["request.go"],
 )
