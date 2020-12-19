@@ -6,13 +6,14 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"net/url"
 	"strconv"
 	"strings"
 )
 
 type Request interface {
 	Method() string
-	URI() string
+	URI() *url.URL
 	HTTPVersion() string
 	Headers() map[string]string
 	Body() string
@@ -20,7 +21,7 @@ type Request interface {
 
 type request struct {
 	method string
-	uri string
+	uri *url.URL
 	httpVersion string
 	headers map[string]string
 	body string
@@ -39,10 +40,14 @@ func Parse(c net.Conn) (Request, error) {
 	if len(requestParts) != 3 {
 		return nil, fmt.Errorf("request line %q did not contain 3 parts", requestLine)
 	}
+	uri, err := url.ParseRequestURI(requestParts[1])
+	if err != nil {
+		return nil, err
+	}
 
 	req := &request{
 		method: requestParts[0],
-		uri: requestParts[1],
+		uri: uri,
 		httpVersion: requestParts[2],
 		headers: map[string]string{},
 	}
@@ -87,7 +92,7 @@ func (r *request) Method() string {
 	return r.method
 }
 
-func (r *request) URI() string {
+func (r *request) URI() *url.URL {
 	return r.uri
 }
 

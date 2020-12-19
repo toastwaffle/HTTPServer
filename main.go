@@ -5,6 +5,8 @@ import (
 	"flag"
 	"log"
 
+	"response"
+	"router"
 	"server"
 )
 
@@ -16,7 +18,15 @@ var (
 func main() {
 	flag.Parse()
 
-	s, err := server.New(server.Host(*host), server.Port(*port))
+	r := router.New(
+		router.Constant("dump",
+			router.Leaf(response.DumpRequest),
+			router.Variable("some_var",
+				router.Leaf(response.DumpRequest),
+				router.PathLeaf(response.DumpRequest, "path"))),
+	)
+
+	s, err := server.New(r, server.Host(*host), server.Port(*port))
 	if err != nil {
 		log.Fatal(err)
 	}

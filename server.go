@@ -8,12 +8,14 @@ import (
 
 	"request"
 	"response"
+	"router"
 	"status"
 )
 
 type Server struct {
 	host string
 	port int
+	router router.Router
 }
 
 type ServerOpt func (*Server) error
@@ -32,10 +34,11 @@ func Port(port int) ServerOpt {
 	}
 }
 
-func New(opts ...ServerOpt) (*Server, error) {
+func New(r router.Router, opts ...ServerOpt) (*Server, error) {
 	s := &Server{
 		host: "",
 		port: 80,
+		router: r,
 	}
 	for _, o := range opts {
 		if err := o(s); err != nil {
@@ -70,5 +73,5 @@ func (s *Server) handleConnection(c net.Conn) {
 		return
 	}
 
-	response.DumpRequest(req).WriteResponse(c, req.HTTPVersion())
+	s.router.Handle(req).WriteResponse(c, req.HTTPVersion())
 }

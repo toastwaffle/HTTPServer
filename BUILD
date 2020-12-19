@@ -3,7 +3,11 @@ load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
 go_binary(
     name = "main",
     srcs = ["main.go"],
-    deps = [":server"],
+    deps = [
+        ":response",
+        ":router",
+        ":server",
+    ],
 )
 
 go_library(
@@ -13,6 +17,7 @@ go_library(
     deps = [
         ":request",
         ":response",
+        ":router",
         ":status",
     ],
 )
@@ -37,4 +42,15 @@ go_library(
     name = "status",
     importpath = "status",
     srcs = ["status.go"],
+)
+
+go_library(
+    name = "router",
+    importpath = "router",
+    srcs = ["router.go"],
+    deps = [
+        ":request",
+        ":response",
+        ":status",
+    ],
 )
